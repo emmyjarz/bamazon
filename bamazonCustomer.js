@@ -1,6 +1,5 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
-let totalCost = 0;
 
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -8,6 +7,11 @@ const connection = mysql.createConnection({
     password: 'milomilo',
     database: 'bamazon'
 });
+let totalCost = 0;
+const { table } = require('table'); 
+let data,
+    output;
+
 
 connection.connect(err => {
     if (err) throw err;
@@ -18,11 +22,26 @@ connection.connect(err => {
 function showAll() {
     connection.query("SELECT * FROM products", (err, res) => {
         if (err) throw err;
-        console.log(`item_id \t product_name \t\t department_name \t\t price \t\t stock_quantity \n`);
+        // console.log(`item_id \t product_name \t\t department_name \t\t price \t\t stock_quantity \n`);
+        // for (let i = 0; i < res.length; i++) {
+        //     console.log(`${res[i].item_id} \t\t ${res[i].product_name} \t\t ${res[i].department_name} \t\t ${res[i].price} \t\t ${res[i].stock_quantity}\n`);
+        // }
+        data = [
+            ["item_id", "product_name", "department_name", "price", "stock_quantity"],
+        ]
         for (let i = 0; i < res.length; i++) {
-            console.log(`${res[i].item_id} \t\t ${res[i].product_name} \t\t ${res[i].department_name} \t\t ${res[i].price} \t\t ${res[i].stock_quantity}\n`);
+            let arr = [];
+            // console.log(res.[0].item_id);
+            arr.push(res[i].item_id);
+            arr.push(res[i].product_name);
+            arr.push(res[i].department_name);
+            arr.push(res[i].price);
+            arr.push(res[i].stock_quantity);
+            data.push(arr)
         }
-
+        // console.log(data);
+        output = table(data);
+        console.log(output);
         buy(res);
     });
 }
