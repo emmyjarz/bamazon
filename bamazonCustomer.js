@@ -1,17 +1,19 @@
-const mysql = require("mysql");
+//npm inquirer
 const inquirer = require("inquirer");
-
+const mysql = require("mysql");
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: 'milomilo',
     database: 'bamazon'
 });
-let totalCost = 0;
-const { table } = require('table'); 
+
+//npm table
+const { table } = require('table');
 let data,
     output;
 
+let totalCost = 0;
 
 connection.connect(err => {
     if (err) throw err;
@@ -22,26 +24,7 @@ connection.connect(err => {
 function showAll() {
     connection.query("SELECT * FROM products", (err, res) => {
         if (err) throw err;
-        // console.log(`item_id \t product_name \t\t department_name \t\t price \t\t stock_quantity \n`);
-        // for (let i = 0; i < res.length; i++) {
-        //     console.log(`${res[i].item_id} \t\t ${res[i].product_name} \t\t ${res[i].department_name} \t\t ${res[i].price} \t\t ${res[i].stock_quantity}\n`);
-        // }
-        data = [
-            ["item_id", "product_name", "department_name", "price", "stock_quantity"],
-        ]
-        for (let i = 0; i < res.length; i++) {
-            let arr = [];
-            // console.log(res.[0].item_id);
-            arr.push(res[i].item_id);
-            arr.push(res[i].product_name);
-            arr.push(res[i].department_name);
-            arr.push(res[i].price);
-            arr.push(res[i].stock_quantity);
-            data.push(arr)
-        }
-        // console.log(data);
-        output = table(data);
-        console.log(output);
+        makeTable(res);
         buy(res);
     });
 }
@@ -52,7 +35,7 @@ function buy(res) {
             name: "itemId",
             message: "What is the ID of the product would you like to buy?",
             validate: val => {
-                if (isNaN(val) === false) {
+                if (isNaN(val) === false && val <= res.length) {
                     return true;
                 }
                 return false;
@@ -60,7 +43,7 @@ function buy(res) {
         },
         {
             type: "input",
-            name: "unit",
+            name: "qty",
             message: "How many units?",
             validate: val => {
                 if (isNaN(val) === false) {
@@ -68,18 +51,19 @@ function buy(res) {
                 }
                 return false;
             }
-
         }
     ]).then(ans => {
+        let choiceId = parseInt(ans.itemId);
+        let choiceQty = parseInt(ans.qty);
         for (let i = 0; i < res.length; i++) {
-            if (res[i].item_id == ans.itemId) {
+            if (res[i].item_id === choiceId) {
                 let choice = res[i];
-                if (choice.stock_quantity >= ans.unit) {
+                if (choice.stock_quantity >= choiceQty) {
                     //minus stock
                     connection.query("UPDATE products SET? WHERE?",
                         [
                             {
-                                stock_quantity: (choice.stock_quantity - ans.unit)
+                                stock_quantity: (choice.stock_quantity - choiceQty)
                             },
                             {
                                 item_id: choice.item_id
@@ -87,7 +71,7 @@ function buy(res) {
                         ],
                         (err, res) => {
                             //calculate the total cost
-                            let cost = choice.price * ans.unit;
+                            let cost = choice.price * choiceQty;
                             totalCost += cost;
                             buyMore(totalCost);
                         }
@@ -118,10 +102,26 @@ function buyMore(totalCost) {
                 showAll();
                 break;
             case "no":
-                console.log(`Your total is: ${totalCost.toFixed(2)} \n Thank you, hope to see you again!!`);
+                console.log(`Your total is: $ ${totalCost.toFixed(2)} \n Thank you, hope to see you again!!`);
                 connection.end();
                 break;
         }
     })
 
+}
+function makeTable(res) {
+    data = [
+        ["item_id", "product_name", "department_name", "price", "stock_quantity"],
+    ]
+    for (let i = 0; i < res.length; i++) {
+        let arr = [];
+        arr.push(res[i].item_id);
+        arr.push(res[i].product_name);
+        arr.push(res[i].department_name);
+        arr.push(`$ ${res[i].price}`);
+        arr.push(res[i].stock_quantity);
+        data.push(arr)
+    }
+    output = table(data);
+    console.log(output);
 }
