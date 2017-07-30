@@ -23,8 +23,8 @@ INSERT INTO products (product_name, department_name, price, stock_quantity) VALU
 INSERT INTO products (product_name, department_name, price, stock_quantity) VALUE('juice', 'beverages', 3.99, 200);
 INSERT INTO products (product_name, department_name, price, stock_quantity) VALUE('milk', 'beverages', 2.99, 300);
 
--- update products set stock_quantity = 4 where item_id = 4;
+-- update products set stock_quantity = 3 where item_id = 7;
 -- update products set price = 5.99 where item_id = 7;
 
 SELECT * FROM products;
-SELECT * FROM products WHERE stock_quantity < 50;
+SELECT * FROM products WHERE stock_quantity < 5;
