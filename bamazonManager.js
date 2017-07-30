@@ -5,7 +5,7 @@ const mysql = require("mysql");
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'milomilo',
+    password: 'Milo0917',
     database: 'bamazon'
 });
 
@@ -88,17 +88,15 @@ function addInventory() {
                         if (isNaN(val) === false && val <= res.length) {
                             return true;
                         }
-                        return false
+                        return false || "Cannot find item ID number, Please input again"
                     }
                 }, {
                     type: "input",
                     message: "How many unit?",
                     name: "addQty",
-                    validate: val => {
-                        if (isNaN(val) === false) {
-                            return true;
-                        }
-                        return false;
+                    validate: (val) => {
+                        let valid = !isNaN(parseFloat(val)) && (val > 0);
+                        return valid || "Please enter a number and quantity cannot be 0 or less than 0";
                     }
                 }
             ]
@@ -115,29 +113,106 @@ function addInventory() {
                             item_id: res[i].item_id
                         }
                     ], (err, res) => {
-                        console.log(`---------------------\nInventory has been update.\n----------------------\n`);
-                        
+                        console.log(`---------------------\nInventory has been updated.\n---------------------\n`);
                         start();
                     })
                 }
-
             }
         })
-
     })
+}
+function addNewProduct() {
+    inquirer.prompt(
+        [
+            {
+                type: "input",
+                name: "newProduct_name",
+                message: "What is the product's name?",
+                validate: val => {
+                    if (val == "") {
+                        return false || "What is the product's name?"
+                    }
+                    return true;
+                }
+            },
+            {
+                type: "input",
+                message: "What is the dapartment's name?",
+                name: "department",
+                validate: val => {
+                    if (val == "") {
+                        return false || "What is the department's name?"
+                    }
+                    return true;
+                }
+            },
+            {
+                type: "input",
+                message: "What is the price?",
+                name: "price",
+                validate: (val) => {
+                    let valid = !isNaN(parseFloat(val));
+                    return valid || "Please enter a number";
 
+                },
+                filter: Number
+            },
+            {
+                type: "input",
+                message: "How many unit?",
+                name: "qty",
+                validate: (val) => {
+                    let valid = !isNaN(parseFloat(val)) && (val > 0);
+                    return valid || "Please enter a number (greater than 0)";
+                }
 
+            }
+        ]
+    ).then(ans => {
+        console.log(`---------------------\n
+        Product: ${ans.newProduct_name.toLowerCase()} \n
+        Department: ${ans.department.toLowerCase()} \n
+        Price: ${ans.price.toFixed(2)} \n
+        Quantity: ${Math.round(ans.qty)} \n---------------------\n`);
+        confirmProductInfo(ans);
+    })
 }
 
+function confirmProductInfo(ans) {
+    inquirer.prompt(
+        [
+            {
+                type: "list",
+                name: "confirm",
+                choices: ["Yes", "No"],
+                message: "Please confirm the info"
+            }
+        ]
+    ).then(result => {
+        if (result.confirm == "Yes") {
+            //adding product into database
+            connection.query("INSERT INTO products SET ?",
+                {
+                    product_name: ans.newProduct_name.toLowerCase(),
+                    department_name: ans.department.toLowerCase(),
+                    price: ans.price.toFixed(2),
+                    stock_quantity: Math.round(ans.qty)
+                }
+                , (err, res) => {
+                    console.log(`---------------------\nItem has been added.\n---------------------\n`);
+                    start();
+                });
 
-
-
-
-
+        } else {
+            start();
+        }
+    });
+}
 
 function stop() {
     connection.end();
 }
+
 function makeTable(res) {
     data = [
         ["item_id", "product_name", "department_name", "price", "stock_quantity"],

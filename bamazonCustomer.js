@@ -4,7 +4,7 @@ const mysql = require("mysql");
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'milomilo',
+    password: 'Milo0917',
     database: 'bamazon'
 });
 
@@ -38,18 +38,16 @@ function buy(res) {
                 if (isNaN(val) === false && val <= res.length) {
                     return true;
                 }
-                return false;
+                return false || "Cannot find item ID number, Please input again";
             }
         },
         {
             type: "input",
             name: "qty",
             message: "How many units?",
-            validate: val => {
-                if (isNaN(val) === false) {
-                    return true;
-                }
-                return false;
+            validate: (val) => {
+                let valid = !isNaN(parseFloat(val)) && (val > 0);
+                return valid || "Please enter a number (greater than 0)";
             }
         }
     ]).then(ans => {
@@ -102,7 +100,7 @@ function buyMore(totalCost) {
                 showAll();
                 break;
             case "no":
-                console.log(`Your total is: $ ${totalCost.toFixed(2)} \n Thank you, hope to see you again!!`);
+                console.log(`-----------------------------------\nYour total is: $ ${totalCost.toFixed(2)} \nThank you, hope to see you again!!\n-----------------------------------\n`);
                 connection.end();
                 break;
         }
@@ -111,7 +109,7 @@ function buyMore(totalCost) {
 }
 function makeTable(res) {
     data = [
-        ["item_id", "product_name", "department_name", "price", "stock_quantity"],
+        ["item_id", "product_name", "department_name", "price"]
     ]
     for (let i = 0; i < res.length; i++) {
         let arr = [];
@@ -119,7 +117,6 @@ function makeTable(res) {
         arr.push(res[i].product_name);
         arr.push(res[i].department_name);
         arr.push(`$ ${res[i].price}`);
-        arr.push(res[i].stock_quantity);
         data.push(arr)
     }
     output = table(data);

@@ -1,6 +1,7 @@
 DROP DATABASE IF EXISTS bamazon;
 CREATE DATABASE bamazon;
 USE bamazon;
+
 CREATE TABLE products(
 	item_id INT(10) AUTO_INCREMENT NOT NULL,
     product_name VARCHAR(100) NOT NULL,
@@ -21,7 +22,9 @@ INSERT INTO products (product_name, department_name, price, stock_quantity) VALU
 INSERT INTO products (product_name, department_name, price, stock_quantity) VALUE('tea', 'beverages', 4.99, 100);
 INSERT INTO products (product_name, department_name, price, stock_quantity) VALUE('juice', 'beverages', 3.99, 200);
 INSERT INTO products (product_name, department_name, price, stock_quantity) VALUE('milk', 'beverages', 2.99, 300);
-update products set stock_quantity = 4 where item_id = 4;
+
+-- update products set stock_quantity = 4 where item_id = 4;
+-- update products set price = 5.99 where item_id = 7;
 
 SELECT * FROM products;
 SELECT * FROM products WHERE stock_quantity < 50;
