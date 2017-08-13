@@ -1,5 +1,9 @@
 # bamazon
 Bamazon is a store software management system which is designed for both customer and manager with node.js
+#### Dependencies
+    - inquirer
+    - mysql
+    - table
 
 ## bamazonCustomer.js
 
